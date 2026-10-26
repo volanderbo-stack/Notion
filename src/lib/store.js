@@ -63,6 +63,7 @@ export function newItem(fields) {
     mime: '', size: 0, name: '', width: 0, height: 0, duration: 0,
     url: '', linkTitle: '', linkDesc: '', linkImage: '', text: '',
     hasThumb: false, thumbV: 0, edits: null, by: memberName(),
+    local: false, // лише на цьому телефоні: не надсилається в спільну галерею
     ...fields,
   }
 }
@@ -104,6 +105,12 @@ export const setHeart = (ids, color, on) =>
   })
 
 export const setHearts = (ids, hearts) => updateItems(ids, () => ({ hearts: sortHearts(hearts), favorite: hearts.length > 0 }))
+
+// Лише на цьому телефоні (on=true) чи спільне. Файли теж: прибрати з сервера або надіслати
+export async function setLocalOnly(ids, on) {
+  await updateItems(ids, () => ({ local: on }))
+  changed({ files: ids.flatMap(itemFileKeys) })
+}
 
 export const trashItems = (ids) => updateItems(ids, () => ({ deletedAt: Date.now() }))
 export const restoreItems = (ids) => updateItems(ids, () => ({ deletedAt: null }))

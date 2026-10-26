@@ -4,7 +4,7 @@ import { Camera, ClipboardPaste, FileText, Globe, Images, Loader2, Mic, Square, 
 import Sheet from './Sheet'
 import { Progress } from './Chrome'
 import { TagInput, ThemeChips } from './ThemeParts'
-import { HeartChips } from './HeartParts'
+import { HeartChips, LocalOnlyToggle } from './HeartParts'
 import { sortHearts } from '../lib/hearts'
 import { addItem, newItem, useStore } from '../lib/store'
 import { allTags } from '../lib/selectors'
@@ -23,7 +23,7 @@ const KINDS = [
   { id: 'file', label: 'Файл / PDF', Icon: FileText, accept: '.pdf,application/pdf,*/*' },
 ]
 
-const emptyForm = (themeId) => ({ caption: '', note: '', tags: [], themeIds: themeId ? [themeId] : [], hearts: [] })
+const emptyForm = (themeId) => ({ caption: '', note: '', tags: [], themeIds: themeId ? [themeId] : [], hearts: [], local: false })
 
 let persistAsked = false
 function askPersist() {
@@ -79,7 +79,7 @@ export default function AddFlow() {
     } catch { toast('Немає доступу до буфера — вставте вручну') }
   }
 
-  const base = () => ({ caption: form.caption.trim(), note: form.note.trim(), tags: form.tags, themeIds: form.themeIds, hearts: form.hearts })
+  const base = () => ({ caption: form.caption.trim(), note: form.note.trim(), tags: form.tags, themeIds: form.themeIds, hearts: form.hearts, local: form.local })
 
   const save = async () => {
     try {
@@ -181,6 +181,7 @@ export default function AddFlow() {
 
           <label className="label">Сердечка</label>
           <HeartChips value={form.hearts} onToggle={(h, on) => setForm({ ...form, hearts: sortHearts(on ? [...form.hearts, h] : form.hearts.filter((x) => x !== h)) })} />
+          <LocalOnlyToggle on={form.local} onChange={(local) => setForm({ ...form, local })} />
         </div>
       )}
     </Sheet>

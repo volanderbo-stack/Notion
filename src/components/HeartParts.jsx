@@ -1,10 +1,11 @@
 // Кольорові сердечка: значки на плитках, вибір кольору, назви категорій
 import { useEffect, useState } from 'react'
-import { Check, Heart, Pencil } from 'lucide-react'
+import { Check, Heart, Lock, Pencil } from 'lucide-react'
 import Sheet from './Sheet'
 import { HEARTS, heartColor, heartLabel } from '../lib/hearts'
 import { getState, setHeart, setHeartLabels, useHeartLabels, useStore } from '../lib/store'
 import { setUI, useUI } from '../lib/ui'
+import { useConn } from '../lib/cloud/state'
 
 // Сердечка, накладені одне на одне (на плитці)
 export function HeartIcons({ hearts, size = 13 }) {
@@ -92,5 +93,20 @@ export function HeartLabelsSheet() {
         ))}
       </div>
     </Sheet>
+  )
+}
+
+// «Лише на цьому телефоні»: елемент не потрапляє в спільну галерею
+export function LocalOnlyToggle({ on, onChange }) {
+  const conn = useConn()
+  return (
+    <button className={`toggle-row lock-row ${on ? 'is-on' : ''}`} onClick={() => onChange(!on)} role="switch" aria-checked={on}>
+      <Lock size={20} />
+      <span className="setting-text">
+        Лише на цьому телефоні
+        <small>{on ? 'Не надсилається в спільну галерею' : conn ? 'Бачать усі учасники спільної галереї' : 'Не потрапить у спільну галерею, якщо приєднаєтесь'}</small>
+      </span>
+      <span className={`switch ${on ? 'is-on' : ''}`} />
+    </button>
   )
 }

@@ -90,10 +90,16 @@ async function push(sb, spaceId) {
   const unfiles = entries.filter(([, v]) => v.kind === 'unfile')
   const recs = entries.filter(([, v]) => v.kind === 'item' || v.kind === 'theme' || v.kind === 'meta')
 
+  const st = getState()
+  const byId = { item: new Map(st.items.map((i) => [i.id, i])), theme: new Map(st.themes.map((t) => [t.id, t])) }
+  // Файли особистих елементів («лише на цьому телефоні») не надсилаються, а прибираються з сервера
+  const isLocalFile = (key) => /^[ote]:/.test(key) && !!byId.item.get(key.slice(2))?.local
+  for (const en of files.filter(([, v]) => isLocalFile(v.id))) unfiles.push(en)
+
   // Спершу файли — щоб інші не побачили елемент без фото
   let tooBig = 0
   const doneFiles = []
-  await pool(files, 3, async (en) => {
+  await pool(files.filter(([, v]) => !isLocalFile(v.id)), 3, async (en) => {
     const blob = await DB.getLocalFile(en[1].id)
     if (blob) {
       const { error } = await sb.storage.from(BUCKET).upload(filePath(spaceId, en[1].id), blob, {
@@ -109,14 +115,12 @@ async function push(sb, spaceId) {
   await DB.outboxDone(doneFiles)
   if (tooBig) setStatus({ tooBig })
 
-  const st = getState()
-  const byId = { item: new Map(st.items.map((i) => [i.id, i])), theme: new Map(st.themes.map((t) => [t.id, t])) }
   for (let i = 0; i < recs.length; i += 100) {
     const batch = recs.slice(i, i + 100)
     const rows = batch.map(([, v]) => {
       if (v.kind === 'meta') return { kind: 'meta', id: 'hearts', data: st.hearts, updated: st.hearts.updatedAt || 1 }
       const rec = byId[v.kind].get(v.id)
-      return rec
+      return rec && !rec.local
         ? { kind: v.kind, id: v.id, data: rec, updated: rec.updatedAt || rec.createdAt || 1 }
         : { kind: v.kind, id: v.id, data: null, deleted: true, updated: Date.now() }
     })
@@ -155,6 +159,8 @@ async function applyPage(sb, conn, rows, pending) {
     }
     const map = row.kind === 'item' ? items : themes
     const local = map.get(row.id)
+    // Особисте — лише тут: зміни з сервера (зокрема видалення) його не стосуються
+    if (local?.local) continue
     // Своя зміна ще не надіслана і новіша — не чіпаємо
     if (pending.has(row.kind + ':' + row.id) && (!local || (local.updatedAt || 0) > row.client_updated)) continue
     if (row.deleted) {

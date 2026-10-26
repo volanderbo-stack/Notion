@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview --host",
     "icons": "node scripts/make-icons.mjs",
-    "test": "node scripts/test-zip.mjs"
+    "test": "node scripts/test-zip.mjs && node scripts/test-sync.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

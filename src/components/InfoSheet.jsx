@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Pencil } from 'lucide-react'
 import Sheet from './Sheet'
 import { TagInput } from './ThemeParts'
-import { setHeart, updateItem, useStore } from '../lib/store'
-import { HeartChips } from './HeartParts'
+import { setHeart, setLocalOnly, updateItem, useStore } from '../lib/store'
+import { HeartChips, LocalOnlyToggle } from './HeartParts'
 import { allTags, themeLabel } from '../lib/selectors'
 import { openPicker, setUI, useUI } from '../lib/ui'
 import { navigate } from '../lib/nav'
@@ -55,6 +55,8 @@ export default function InfoSheet() {
 
           <label className="label">Сердечка</label>
           <HeartChips value={item.hearts} onToggle={(h, on) => setHeart([item.id], h, on)} />
+
+          <LocalOnlyToggle on={!!item.local} onChange={(on) => setLocalOnly([item.id], on)} />
 
           <div className="label-row">
             <label className="label">Теми</label>

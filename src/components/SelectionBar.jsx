@@ -1,6 +1,6 @@
 // Панель масових дій для вибраних елементів
-import { FolderInput, FolderPlus, Heart, Share2, Trash2, X, CheckCheck } from 'lucide-react'
-import { getState, restoreItems, trashItems } from '../lib/store'
+import { FolderInput, FolderPlus, Heart, Lock, LockOpen, Share2, Trash2, X, CheckCheck } from 'lucide-react'
+import { getState, restoreItems, setLocalOnly, trashItems } from '../lib/store'
 import { openHearts, openPicker, toast } from '../lib/ui'
 import { shareItems } from '../lib/share'
 import { pluralItems } from '../lib/format'
@@ -21,6 +21,11 @@ export function SelectionHeader({ selection, allIds }) {
 export default function SelectionBar({ selection, themeId }) {
   const ids = selection.ids
   const items = getState().items.filter((i) => selection.has(i.id))
+  const allLocal = items.length > 0 && items.every((i) => i.local)
+  const toggleLocal = async () => {
+    await setLocalOnly(ids, !allLocal)
+    toast(allLocal ? 'Знову спільне' : 'Лише на цьому телефоні 🔒')
+  }
   const share = async () => {
     const r = await shareItems(items)
     if (r === 'downloaded') toast('Файли збережено')
@@ -35,8 +40,9 @@ export default function SelectionBar({ selection, themeId }) {
   return (
     <div className="selection-bar">
       <button onClick={() => openHearts(ids)}><Heart size={22} /><span>Сердечко</span></button>
+      <button onClick={toggleLocal}>{allLocal ? <LockOpen size={22} /> : <Lock size={22} />}<span>{allLocal ? 'Спільне' : 'Особисте'}</span></button>
       <button onClick={() => openPicker(ids, 'add', null, selection.clear)}><FolderPlus size={22} /><span>У тему</span></button>
-      <button onClick={() => openPicker(ids, 'move', themeId, selection.clear)}><FolderInput size={22} /><span>Перемістити</span></button>
+      <button onClick={() => openPicker(ids, 'move', themeId, selection.clear)}><FolderInput size={22} /><span>Перенести</span></button>
       <button onClick={share}><Share2 size={22} /><span>Поділитися</span></button>
       <button className="danger" onClick={del}><Trash2 size={22} /><span>Видалити</span></button>
     </div>
