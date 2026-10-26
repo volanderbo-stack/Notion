@@ -15,7 +15,8 @@ export function fileUrl(key, v) {
   if (pending.has(k)) return pending.get(k)
   const p = getFile(key).then((blob) => {
     const u = blob ? URL.createObjectURL(blob) : null
-    urls.set(k, u)
+    // Відсутній файл не запам'ятовуємо: його ще може докачати спільна галерея
+    if (u) urls.set(k, u)
     pending.delete(k)
     if (u && !key.startsWith('t:') && !key.startsWith('c:')) {
       bigOrder.push(k)

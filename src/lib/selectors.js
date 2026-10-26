@@ -78,8 +78,9 @@ export function groupByDate(list) {
 
 export const normTag = (t) => t.trim().replace(/^#+/, '').replace(/[\s,]+/g, '_').toLowerCase()
 
-// f: { q, types:[], themeId, favOnly, from, to (yyyy-mm-dd), sort }
-export function searchItems(items, themes, f) {
+// f: { q, types:[], themeId, favOnly, hearts:[], from, to (yyyy-mm-dd), sort }
+// heartLabels: назви кольорових сердечок — «картки» знаходить усе з таким сердечком
+export function searchItems(items, themes, f, heartLabels = {}) {
   const tokens = (f.q || '').toLowerCase().split(/\s+/).filter(Boolean)
   const themeNames = new Map(themes.map((t) => [t.id, t.name.toLowerCase()]))
   const inTheme = f.themeId ? descendantIds(themes, f.themeId) : null
@@ -90,10 +91,11 @@ export function searchItems(items, themes, f) {
     if (!isLive(i)) return false
     if (f.types?.length && !f.types.includes(i.type)) return false
     if (f.favOnly && !i.favorite) return false
+    if (f.hearts?.length && !f.hearts.some((h) => i.hearts?.includes(h))) return false
     if (inTheme && !i.themeIds.some((t) => inTheme.has(t))) return false
     if (i.createdAt < from || i.createdAt > to) return false
     if (!tokens.length) return true
-    const hay = [i.caption, i.note, i.text, i.name, i.url, i.linkTitle, i.linkDesc, ...i.tags.map((t) => '#' + t), ...i.themeIds.map((t) => themeNames.get(t) || '')]
+    const hay = [i.caption, i.note, i.text, i.name, i.url, i.linkTitle, i.linkDesc, ...i.tags.map((t) => '#' + t), ...i.themeIds.map((t) => themeNames.get(t) || ''), ...(i.hearts || []).map((h) => heartLabels[h] || ''), i.by]
       .join(' \n ').toLowerCase()
     return tokens.every((tok) => hay.includes(tok))
   })

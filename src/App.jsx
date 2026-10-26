@@ -5,6 +5,7 @@ import Viewer from './components/Viewer'
 import InfoSheet from './components/InfoSheet'
 import PhotoEditor from './components/PhotoEditor'
 import { ThemeEditorSheet, ThemePickerSheet } from './components/ThemeParts'
+import { HeartLabelsSheet, HeartSheet } from './components/HeartParts'
 import Gallery from './screens/Gallery'
 import Themes from './screens/Themes'
 import ThemeDetail, { Unsorted } from './screens/ThemeDetail'
@@ -15,6 +16,7 @@ import Settings from './screens/Settings'
 import { load, useStore } from './lib/store'
 import { useRoute } from './lib/nav'
 import { useSettings } from './lib/settings'
+import { startCloud } from './lib/cloud/sync'
 
 function useThemeMode() {
   const { themeMode } = useSettings()
@@ -36,10 +38,11 @@ function Screen({ route }) {
     case 'themes': return <Themes />
     case 'theme': return <ThemeDetail id={route.id} />
     case 'unsorted': return <Unsorted />
-    case 'favorites': return <Favorites />
+    case 'favorites': return <Favorites heart={route.id} />
     case 'search': return <Search />
     case 'trash': return <Trash />
     case 'settings': return <Settings />
+    case 'join': return <Settings joinCode={route.id} />
     default: return <Gallery />
   }
 }
@@ -50,7 +53,7 @@ export default function App() {
   useThemeMode()
 
   useEffect(() => {
-    load().catch((e) => {
+    load().then(startCloud).catch((e) => {
       console.error(e)
       alert('Не вдалося відкрити сховище браузера. Можливо, увімкнено приватний режим.')
     })
@@ -72,6 +75,8 @@ export default function App() {
         <BottomNav route={route} />
         <Viewer />
         <InfoSheet />
+        <HeartSheet />
+        <HeartLabelsSheet />
         <ThemePickerSheet />
         <AddFlow />
         <ThemeEditorSheet />

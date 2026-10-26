@@ -175,7 +175,8 @@ h1, h2, h3 { margin: 0; }
 }
 .tile-extra { right: auto; left: 5px; top: 5px; bottom: auto; }
 .tile-heart { position: absolute; left: 6px; bottom: 5px; color: #fff; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); }
-.tile-heart svg { color: var(--heart); }
+.heart-stack { display: inline-flex; }
+.heart-stack svg + svg { margin-left: -4px; }
 .tile-link .tile-heart, .tile-text .tile-heart, .tile-voice .tile-heart, .tile-file .tile-heart { top: 6px; bottom: auto; }
 .tile-check {
   position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%;
@@ -443,6 +444,25 @@ button.setting-row:active { background: var(--surface-2); }
 .setting-row > svg { color: var(--text-2); flex: none; }
 .setting-text { flex: 1; display: flex; flex-direction: column; font-weight: 550; }
 .setting-text small { color: var(--text-2); font-weight: 400; font-size: 12.5px; }
+.danger-text, .setting-text small.danger-text { color: var(--danger); }
+.setting-row.danger-text > svg { color: var(--danger); }
+.card .form, .shared-actions, .invite, .members { padding: 4px 12px 10px; }
+.card .label { display: block; padding: 6px 12px 2px; }
+.card .form .label, .invite .label { padding: 0; }
+.shared-actions { display: flex; flex-direction: column; gap: 8px; }
+.shared-actions.row { flex-direction: row; padding: 0; }
+.shared-actions.row .btn-primary { flex: 1; }
+.code-input { text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; text-align: center; font-size: 18px; }
+.invite { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.invite-code {
+  align-self: stretch; text-align: center; font-size: 26px; font-weight: 800; letter-spacing: 0.18em; padding: 12px;
+  border-radius: 14px; background: var(--surface-2); font-variant-numeric: tabular-nums; cursor: pointer; user-select: all;
+}
+.members { display: flex; flex-direction: column; gap: 2px; }
+.member { display: flex; align-items: center; gap: 10px; min-height: 48px; }
+.member-avatar { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--accent), #a15cff); }
+.member-name { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.member-name small { color: var(--text-2); font-weight: 400; }
 .setting-block { display: flex; flex-direction: column; gap: 10px; padding: 10px 12px; }
 .segmented { display: flex; background: var(--surface-2); border-radius: 12px; padding: 3px; }
 .segmented button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; border-radius: 10px; font-weight: 600; font-size: 14px; color: var(--text-2); transition: background 0.2s, color 0.2s; }
@@ -498,6 +518,25 @@ button.setting-row:active { background: var(--surface-2); }
 .va:active { transform: scale(0.88); background: rgba(255, 255, 255, 0.12); }
 .va.is-fav { color: var(--heart); }
 .va.is-fav svg { animation: heart-pop 0.35s var(--ease); }
+.va { position: relative; }
+.va-count { position: absolute; top: 6px; right: 4px; min-width: 16px; height: 16px; border-radius: 8px; background: #fff; color: #111; font-size: 10.5px; font-weight: 800; display: grid; place-items: center; }
+
+/* Кольорові сердечка */
+.heart-chip.is-active { font-weight: 650; }
+.heart-list { display: flex; flex-direction: column; gap: 6px; }
+.heart-row {
+  --tc: var(--heart); display: flex; align-items: center; gap: 14px; min-height: 56px; padding: 0 16px;
+  border-radius: 16px; background: var(--surface-2); text-align: left; font-size: 16px; font-weight: 600;
+  transition: background 0.15s, transform 0.12s;
+}
+.heart-row:active { transform: scale(0.98); }
+.heart-row.is-on { background: color-mix(in srgb, var(--tc) 15%, var(--surface)); }
+.heart-row.is-on svg:first-child { animation: heart-pop 0.35s var(--ease); }
+.heart-row-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.heart-row-check { color: var(--tc); }
+.heart-rename { margin: 12px 4px 4px; }
+.heart-label-row { display: flex; align-items: center; gap: 12px; }
+.heart-label-row svg { flex: none; }
 
 /* Плеєр */
 .player { position: relative; width: 100%; height: 100%; display: grid; place-items: center; }

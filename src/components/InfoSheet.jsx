@@ -1,9 +1,10 @@
 // «Інфо»: дата, розмір, роздільна здатність, теми, теги, підпис і примітка (з автозбереженням)
 import { useEffect, useMemo, useState } from 'react'
-import { Pencil, Heart } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import Sheet from './Sheet'
 import { TagInput } from './ThemeParts'
-import { toggleFavorite, updateItem, useStore } from '../lib/store'
+import { setHeart, updateItem, useStore } from '../lib/store'
+import { HeartChips } from './HeartParts'
 import { allTags, themeLabel } from '../lib/selectors'
 import { openPicker, setUI, useUI } from '../lib/ui'
 import { navigate } from '../lib/nav'
@@ -33,6 +34,7 @@ export default function InfoSheet() {
     ['Тип', TYPE_LABELS[item.type]],
     ['Дата', formatDate(item.createdAt)],
     item.addedAt && Math.abs(item.addedAt - item.createdAt) > 60000 && ['Додано', formatDate(item.addedAt)],
+    item.by && ['Хто додав', item.by],
     item.size > 0 && ['Розмір', formatBytes(item.size)],
     item.width > 0 && ['Роздільна здатність', `${item.width} × ${item.height}${item.width * item.height > 1e6 ? ` (${(item.width * item.height / 1e6).toFixed(1).replace('.', ',')} Мп)` : ''}`],
     item.duration > 0 && ['Тривалість', formatDuration(item.duration)],
@@ -51,9 +53,8 @@ export default function InfoSheet() {
           )}
           <textarea className="input textarea" value={draft.note} onChange={(e) => change({ note: e.target.value })} placeholder="Примітка" />
 
-          <button className={`toggle-row ${item.favorite ? 'is-on' : ''}`} onClick={() => toggleFavorite([item.id], !item.favorite)}>
-            <Heart size={20} fill={item.favorite ? 'currentColor' : 'none'} /> {item.favorite ? 'В улюбленому' : 'Додати в улюблене'}
-          </button>
+          <label className="label">Сердечка</label>
+          <HeartChips value={item.hearts} onToggle={(h, on) => setHeart([item.id], h, on)} />
 
           <div className="label-row">
             <label className="label">Теми</label>

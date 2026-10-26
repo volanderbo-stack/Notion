@@ -1,6 +1,7 @@
 // Мініатюра елемента в сітці (фото, відео або картка для інших типів)
 import { memo, useRef } from 'react'
-import { Check, FileText, Globe, Heart, Mic, Play, StickyNote, ImageOff } from 'lucide-react'
+import { Check, FileText, Globe, Mic, Play, StickyNote, ImageOff } from 'lucide-react'
+import { HeartIcons } from './HeartParts'
 import { fileKey } from '../lib/db'
 import { useFileUrl } from '../lib/urls'
 import { useInView } from '../lib/hooks'
@@ -55,7 +56,7 @@ function Tile({ item, cols, selecting, selected, onTap, onLong, badge }) {
       {item.type === 'video' && (
         <span className="tile-badge tile-duration"><Play size={10} fill="currentColor" />{!small && formatDuration(item.duration)}</span>
       )}
-      {item.favorite && <span className="tile-heart"><Heart size={small ? 10 : 13} fill="currentColor" strokeWidth={0} /></span>}
+      {item.favorite && <span className="tile-heart"><HeartIcons hearts={item.hearts} size={small ? 10 : 13} /></span>}
       {badge && <span className="tile-badge tile-extra">{badge}</span>}
       {selecting && <span className="tile-check">{selected && <Check size={14} strokeWidth={3} />}</span>}
     </button>

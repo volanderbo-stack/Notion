@@ -6,8 +6,9 @@ import { fileKey } from '../lib/db'
 import { useFileUrl } from '../lib/urls'
 import { useBackClose } from '../lib/nav'
 import { usePresence, useScrollLock } from '../lib/hooks'
-import { restoreItems, toggleFavorite, trashItems, useStore } from '../lib/store'
-import { openEditor, openInfo, openPicker, setUI, toast, useUI } from '../lib/ui'
+import { restoreItems, trashItems, useStore } from '../lib/store'
+import { heartColor } from '../lib/hearts'
+import { openEditor, openHearts, openInfo, openPicker, setUI, toast, useUI } from '../lib/ui'
 import { formatBytes, formatDate, formatDuration, hostname } from '../lib/format'
 import { titleOf } from '../lib/selectors'
 import { downloadBlob, itemBlob, itemFileName, shareItems } from '../lib/share'
@@ -290,8 +291,9 @@ function ViewerBottom({ item }) {
         </button>
       )}
       <div className="viewer-actions">
-        <button className={`va ${item.favorite ? 'is-fav' : ''}`} onClick={() => toggleFavorite([item.id], !item.favorite)} aria-label="Улюблене">
+        <button className={`va ${item.favorite ? 'is-fav' : ''}`} style={item.favorite ? { color: heartColor(item.hearts[0]) } : undefined} onClick={() => openHearts([item.id])} aria-label="Сердечко">
           <Heart size={24} fill={item.favorite ? 'currentColor' : 'none'} />
+          {item.hearts.length > 1 && <span className="va-count">{item.hearts.length}</span>}
         </button>
         <button className="va" onClick={() => openInfo(item.id)} aria-label="Інфо"><Info size={24} /></button>
         {item.type === 'photo' && <button className="va" onClick={() => openEditor(item.id)} aria-label="Редагувати"><SlidersHorizontal size={24} /></button>}

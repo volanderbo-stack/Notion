@@ -10,6 +10,8 @@ import { applyBackup, buildBackup, readBackup } from '../lib/backup'
 import { downloadBlob } from '../lib/share'
 import { formatBytes, pluralItems } from '../lib/format'
 import { installApp, useInstallState } from '../lib/install'
+import { getConn } from '../lib/cloud/state'
+import SharedSection from '../components/SharedSection'
 
 function Segmented({ value, options, onChange }) {
   return (
@@ -32,7 +34,7 @@ function Switch({ on, onChange, label, hint }) {
   )
 }
 
-export default function Settings() {
+export default function Settings({ joinCode }) {
   const s = useSettings()
   const items = useStore((st) => st.items)
   const trashCount = items.filter((i) => i.deletedAt).length
@@ -75,7 +77,8 @@ export default function Settings() {
         text: `В архіві: ${pluralItems(n)}, тем: ${backup.meta.themes?.length || 0}.`,
         actions: [
           { id: 'merge', label: 'Додати до наявного' },
-          { id: 'replace', label: 'Замінити все (поточні дані зітруться)', danger: true },
+          // У спільній галереї «замінити все» стерло б дані лише тут — тому тільки додавання
+          ...(getConn() ? [] : [{ id: 'replace', label: 'Замінити все (поточні дані зітруться)', danger: true }]),
         ],
       })
       if (!mode) return
@@ -100,6 +103,8 @@ export default function Settings() {
     <>
       <Header title="Налаштування" left={<button className="icon-btn" onClick={() => navigate('/')} aria-label="Назад"><ArrowLeft size={22} /></button>} />
       <div className="pad settings">
+        <SharedSection joinCode={joinCode} />
+
         <section className="card">
           <h3 className="card-title">Вигляд</h3>
           <div className="setting-block">
@@ -134,7 +139,7 @@ export default function Settings() {
             <span className="setting-text">
               Сховище
               <small>
-                {usage ? `Зайнято ${formatBytes(usage.usage)}${usage.quota ? ` з ~${formatBytes(usage.quota)}` : ''}` : 'Дані зберігаються лише на цьому пристрої'}
+                {usage ? `Зайнято ${formatBytes(usage.usage)}${usage.quota ? ` з ~${formatBytes(usage.quota)}` : ''}` : (getConn() ? 'Копія фото — на цьому пристрої' : 'Дані зберігаються лише на цьому пристрої')}
                 {persisted === true && ' · захищено від очищення'}
               </small>
             </span>
@@ -156,7 +161,7 @@ export default function Settings() {
               <span className="setting-text">Встановлення<small>{install.ios ? 'Safari → «Поділитися» → «На початковий екран»' : 'Меню браузера → «Встановити застосунок» / «Додати на головний екран»'}</small></span>
             </div>
           )}
-          <p className="hint">Розумна галерея · усі дані зберігаються локально у браузері (IndexedDB). Регулярно робіть резервну копію.</p>
+          <p className="hint">Розумна галерея · дані зберігаються у браузері (IndexedDB), а в спільній галереї — ще й на сервері. Регулярно робіть резервну копію.</p>
         </section>
       </div>
     </>

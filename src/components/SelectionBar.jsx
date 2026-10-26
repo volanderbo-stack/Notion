@@ -1,7 +1,7 @@
 // Панель масових дій для вибраних елементів
 import { FolderInput, FolderPlus, Heart, Share2, Trash2, X, CheckCheck } from 'lucide-react'
-import { getState, restoreItems, toggleFavorite, trashItems } from '../lib/store'
-import { openPicker, toast } from '../lib/ui'
+import { getState, restoreItems, trashItems } from '../lib/store'
+import { openHearts, openPicker, toast } from '../lib/ui'
 import { shareItems } from '../lib/share'
 import { pluralItems } from '../lib/format'
 
@@ -21,12 +21,6 @@ export function SelectionHeader({ selection, allIds }) {
 export default function SelectionBar({ selection, themeId }) {
   const ids = selection.ids
   const items = getState().items.filter((i) => selection.has(i.id))
-  const allFav = items.length > 0 && items.every((i) => i.favorite)
-
-  const fav = async () => {
-    await toggleFavorite(ids, !allFav)
-    toast(allFav ? 'Прибрано з улюбленого' : 'Додано в улюблене ❤️')
-  }
   const share = async () => {
     const r = await shareItems(items)
     if (r === 'downloaded') toast('Файли збережено')
@@ -40,7 +34,7 @@ export default function SelectionBar({ selection, themeId }) {
 
   return (
     <div className="selection-bar">
-      <button onClick={fav}><Heart size={22} fill={allFav ? 'currentColor' : 'none'} /><span>{allFav ? 'Зняти' : 'Улюблене'}</span></button>
+      <button onClick={() => openHearts(ids)}><Heart size={22} /><span>Сердечко</span></button>
       <button onClick={() => openPicker(ids, 'add', null, selection.clear)}><FolderPlus size={22} /><span>У тему</span></button>
       <button onClick={() => openPicker(ids, 'move', themeId, selection.clear)}><FolderInput size={22} /><span>Перемістити</span></button>
       <button onClick={share}><Share2 size={22} /><span>Поділитися</span></button>

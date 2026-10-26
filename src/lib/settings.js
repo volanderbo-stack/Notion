@@ -8,6 +8,7 @@ const defaults = {
   linkPreviews: true, // завантажувати превʼю посилань через microlink.io
   galleryAll: false, // показувати в галереї не лише фото й відео
   sort: 'new',
+  favHeart: null, // останній вибраний колір у «Сердечках»
 }
 
 function read() {

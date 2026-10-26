@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url'
 const dir = await mkdtemp(join(tmpdir(), 'zip-'))
 const src = await readFile(new URL('../src/lib/backup.js', import.meta.url), 'utf8')
 await writeFile(join(dir, 'backup.mjs'), src.replace(/from '\.\/(db|store|share)'/g, "from './stub.mjs'"))
-await writeFile(join(dir, 'stub.mjs'), 'export const getState = () => ({}); export const load = () => {}; export const newItem = () => ({}); export const extOf = () => "bin"; export const getFile = () => null; export const fileKeys = () => [];')
+await writeFile(join(dir, 'stub.mjs'), 'export const getState = () => ({}); export const load = () => {}; export const newItem = () => ({}); export const normItem = (i) => i; export const notifyImported = () => {}; export const putMeta = () => {}; export const extOf = () => "bin"; export const getFile = () => null; export const fileKeys = () => [];')
 const { createZip, readBackup } = await import(pathToFileURL(join(dir, 'backup.mjs')).href)
 
 const zip = createZip()

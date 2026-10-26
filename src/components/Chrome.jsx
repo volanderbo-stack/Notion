@@ -32,7 +32,7 @@ const TABS = [
   { name: 'gallery', path: '/', label: 'Галерея', Icon: Images },
   { name: 'themes', path: '/themes', label: 'Теми', Icon: LayoutGrid },
   null,
-  { name: 'favorites', path: '/favorites', label: 'Улюблене', Icon: Heart },
+  { name: 'favorites', path: '/favorites', label: 'Сердечка', Icon: Heart },
   { name: 'search', path: '/search', label: 'Пошук', Icon: Search },
 ]
 

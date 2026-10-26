@@ -4,18 +4,20 @@ import { Search as SearchIcon, SlidersHorizontal, X, Heart } from 'lucide-react'
 import { Header, Empty } from '../components/Chrome'
 import ItemGrid from '../components/ItemGrid'
 import SelectionBar, { SelectionHeader } from '../components/SelectionBar'
-import { useStore } from '../lib/store'
+import { useHeartLabels, useStore } from '../lib/store'
+import { HEARTS, heartLabel } from '../lib/hearts'
 import { allTags, searchItems, themeTree } from '../lib/selectors'
 import { useSelection } from '../lib/hooks'
 import { TYPE_LABELS, pluralItems } from '../lib/format'
 import { SORTS } from './ThemeDetail'
 
-const EMPTY = { q: '', types: [], themeId: '', favOnly: false, from: '', to: '', sort: 'new' }
+const EMPTY = { q: '', types: [], themeId: '', favOnly: false, hearts: [], from: '', to: '', sort: 'new' }
 let saved = { ...EMPTY } // фільтри зберігаються між переходами
 
 export default function Search() {
   const items = useStore((s) => s.items)
   const themes = useStore((s) => s.themes)
+  const labels = useHeartLabels()
   const [f, setF0] = useState(saved)
   const [panel, setPanel] = useState(false)
   const sel = useSelection()
@@ -23,9 +25,9 @@ export default function Search() {
 
   const tags = useMemo(() => allTags(items).slice(0, 30), [items])
   const tree = useMemo(() => themeTree(themes), [themes])
-  const activeFilters = f.types.length + (f.themeId ? 1 : 0) + (f.favOnly ? 1 : 0) + (f.from || f.to ? 1 : 0)
+  const activeFilters = f.types.length + (f.themeId ? 1 : 0) + (f.favOnly || f.hearts.length ? 1 : 0) + (f.from || f.to ? 1 : 0)
   const searching = f.q.trim() || activeFilters
-  const results = useMemo(() => (searching ? searchItems(items, themes, f) : []), [items, themes, f, searching])
+  const results = useMemo(() => (searching ? searchItems(items, themes, f, labels) : []), [items, themes, f, searching, labels])
   const ids = useMemo(() => results.map((i) => i.id), [results])
   const toggleType = (t) => setF({ types: f.types.includes(t) ? f.types.filter((x) => x !== t) : [...f.types, t] })
   const addToken = (tok) => setF({ q: f.q.split(/\s+/).includes(tok) ? f.q : `${f.q} ${tok}`.trim() })
@@ -81,9 +83,21 @@ export default function Search() {
               <input className="input" type="date" value={f.to} onChange={(e) => setF({ to: e.target.value })} />
             </label>
           </div>
-          <button className={`toggle-row ${f.favOnly ? 'is-on' : ''}`} onClick={() => setF({ favOnly: !f.favOnly })}>
-            <Heart size={20} fill={f.favOnly ? 'currentColor' : 'none'} /> Тільки улюблене
-          </button>
+          <span className="label">Сердечка</span>
+          <div className="chips wrap">
+            <button className={`chip ${f.favOnly ? 'is-active' : ''}`} onClick={() => setF({ favOnly: !f.favOnly, hearts: [] })}>
+              <Heart size={15} fill={f.favOnly ? 'currentColor' : 'none'} /> Будь-яке
+            </button>
+            {HEARTS.map((h) => {
+              const on = f.hearts.includes(h.id)
+              return (
+                <button key={h.id} className={`chip heart-chip ${on ? 'is-active' : ''}`} style={{ '--tc': h.color }}
+                  onClick={() => setF({ favOnly: false, hearts: on ? f.hearts.filter((x) => x !== h.id) : [...f.hearts, h.id] })}>
+                  <Heart size={15} fill={on ? h.color : 'none'} color={h.color} /> {heartLabel(h.id, labels)}
+                </button>
+              )
+            })}
+          </div>
           {activeFilters > 0 && <button className="link-btn" onClick={() => setF({ ...EMPTY, q: f.q })}>Скинути фільтри</button>}
         </div>
       )}

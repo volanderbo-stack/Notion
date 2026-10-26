@@ -1,7 +1,7 @@
 // Резервна копія: ZIP-архів (без стиснення — фото й відео вже стиснуті) з backup.json і всіма файлами.
 // Власний мінімальний ZIP: файли не копіюються в пам'ять, архів складається з посилань на Blob-и.
 import * as DB from './db'
-import { getState, load, newItem } from './store'
+import { getState, load, newItem, normItem, notifyImported } from './store'
 import { extOf } from './share'
 
 const APP = 'rozumna-galereya'
@@ -73,7 +73,7 @@ export function createZip() {
 }
 
 export async function buildBackup(onProgress) {
-  const { items, themes } = getState()
+  const { items, themes, hearts } = getState()
   const keys = (await DB.fileKeys()).filter((k) => typeof k === 'string')
   const zip = createZip()
   const files = {}
@@ -87,7 +87,7 @@ export async function buildBackup(onProgress) {
     }
     onProgress?.(i + 1, keys.length)
   }
-  const meta = { app: APP, version: 1, exportedAt: Date.now(), items, themes, files }
+  const meta = { app: APP, version: 1, exportedAt: Date.now(), items, themes, hearts, files }
   await zip.add('backup.json', new Blob([JSON.stringify(meta)], { type: 'application/json' }))
   return zip.finish()
 }
@@ -147,7 +147,7 @@ export async function applyBackup(backup, mode, onProgress) {
   const { items: curItems, themes: curThemes } = getState()
   const haveItems = mode === 'merge' ? new Set(curItems.map((i) => i.id)) : new Set()
   const haveThemes = mode === 'merge' ? new Set(curThemes.map((t) => t.id)) : new Set()
-  const items = (meta.items || []).filter((i) => !haveItems.has(i.id)).map((i) => ({ ...newItem(), ...i }))
+  const items = (meta.items || []).filter((i) => !haveItems.has(i.id)).map((i) => normItem({ ...newItem(), hearts: undefined, by: '', ...i }))
   const themes = (meta.themes || []).filter((t) => !haveThemes.has(t.id))
   const owners = new Set([...items.map((i) => i.id), ...themes.map((t) => t.id)])
   const keys = Object.keys(meta.files || {}).filter((k) => owners.has(k.slice(2)))
@@ -161,6 +161,14 @@ export async function applyBackup(backup, mode, onProgress) {
   }
   await DB.putMany('themes', themes)
   await DB.putMany('items', items)
+  // Назви сердечок: при заміні — з копії, при додаванні — лише якщо свої ще не змінювали
+  if (meta.hearts && (mode === 'replace' || !getState().hearts.updatedAt)) await DB.putMeta('hearts', meta.hearts)
   await load()
+  notifyImported({
+    items: items.map((i) => i.id),
+    themes: themes.map((t) => t.id),
+    files: keys,
+    meta: !!meta.hearts,
+  })
   return { items: items.length, themes: themes.length }
 }

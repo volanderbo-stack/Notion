@@ -8,6 +8,8 @@ let ui = {
   editor: null, // id фото
   picker: null, // { ids, mode: 'add'|'move', fromThemeId, onDone }
   themeEditor: null, // { id } або { parentId } для нової
+  hearts: null, // { ids } — вибір кольорових сердечок
+  heartLabels: false, // шторка назв сердечок
   dialog: null, // { title, text, ok, danger, input, resolve, actions }
   toast: null, // { text, action, onAction, key }
 }
@@ -28,6 +30,7 @@ export const openInfo = (id) => setUI({ info: id })
 export const openEditor = (id) => setUI({ editor: id })
 export const openPicker = (ids, mode = 'add', fromThemeId = null, onDone = null) => setUI({ picker: { ids, mode, fromThemeId, onDone } })
 export const openThemeEditor = (opts) => setUI({ themeEditor: opts })
+export const openHearts = (ids) => setUI({ hearts: { ids } })
 
 let toastTimer
 export function toast(text, action, onAction) {
