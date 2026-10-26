@@ -19,6 +19,15 @@ export function db() {
           d.createObjectStore('outbox')
         }
       },
+      // Оновлення бази чекає, поки закриється стара версія застосунку в іншій вкладці
+      blocked() {
+        window.dispatchEvent(new Event('galereya:db-blocked'))
+      },
+      // Нова версія в іншій вкладці хоче оновити базу — звільняємо її і перезавантажуємось
+      blocking(_cur, _next, e) {
+        e.target.close()
+        location.reload()
+      },
     })
   }
   return dbp

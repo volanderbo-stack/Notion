@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BottomNav, Dialog, ErrorBoundary, Toast } from './components/Chrome'
 import AddFlow from './components/AddFlow'
 import Viewer from './components/Viewer'
@@ -50,7 +50,14 @@ function Screen({ route }) {
 export default function App() {
   const ready = useStore((s) => s.ready)
   const route = useRoute()
+  const [dbBlocked, setDbBlocked] = useState(false)
   useThemeMode()
+
+  useEffect(() => {
+    const f = () => setDbBlocked(true)
+    window.addEventListener('galereya:db-blocked', f)
+    return () => window.removeEventListener('galereya:db-blocked', f)
+  }, [])
 
   useEffect(() => {
     load().then(startCloud).catch((e) => {
@@ -70,7 +77,14 @@ export default function App() {
             <Screen route={route} />
           </main>
         ) : (
-          <div className="splash"><div className="splash-logo" /></div>
+          <div className="splash">
+            <div className="splash-logo" />
+            {dbBlocked && (
+              <p className="splash-text">
+                Застосунок оновився. Закрийте інші вкладки чи вікна з Розумною галереєю — і він відкриється.
+              </p>
+            )}
+          </div>
         )}
         <BottomNav route={route} />
         <Viewer />
