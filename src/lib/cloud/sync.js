@@ -261,6 +261,11 @@ export async function syncNow() {
     await session(sb)
     await push(sb, conn.spaceId)
     await pull(sb, getConn())
+    // Галерея видна лише учасникам: якщо її не видно — нас прибрали
+    const { data: space, error } = await sb.from('spaces').select('name,invite_code').eq('id', conn.spaceId).maybeSingle()
+    if (error) throw error
+    if (!space) throw new Error('not a member')
+    if (space.name !== conn.spaceName || space.invite_code !== conn.inviteCode) setConn({ spaceName: space.name, inviteCode: space.invite_code })
     const left = (await DB.outboxAll()).length
     setStatus({ state: 'idle', lastSync: Date.now(), pending: left })
     prefetchHearted(sb, conn.spaceId)

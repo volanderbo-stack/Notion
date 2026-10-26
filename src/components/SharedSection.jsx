@@ -87,10 +87,9 @@ function Connected({ conn }) {
   const [members, setMembers] = useState(null)
 
   const loadMembers = () => listMembers().then(setMembers).catch(() => setMembers(null))
-  useEffect(() => {
-    refreshSpace().catch(() => {})
-    loadMembers()
-  }, [])
+  useEffect(() => { refreshSpace().catch(() => {}) }, [])
+  // Після кожної синхронізації — свіжий список (хтось приєднався чи вийшов)
+  useEffect(() => { loadMembers() }, [status.lastSync])
 
   const link = inviteLink(conn.inviteCode)
   const share = async () => {
@@ -107,7 +106,7 @@ function Connected({ conn }) {
     try { await newInviteCode(); toast('Код змінено') } catch (e) { toast(e.message) }
   }
   const kick = async (m) => {
-    if (!(await confirm({ title: `Прибрати ${m.name || 'учасника'}?`, text: 'Він більше не бачитиме галерею. Щоб не повернувся за старим посиланням — змініть код.', ok: 'Прибрати', danger: true }))) return
+    if (!(await confirm({ title: `Прибрати ${m.name || 'учасника'}?`, text: 'Учасник більше не бачитиме галерею. Щоб не повернувся за старим посиланням — змініть код.', ok: 'Прибрати', danger: true }))) return
     try { await removeMember(m.user_id); loadMembers() } catch (e) { toast(e.message) }
   }
   const rename = async () => {
