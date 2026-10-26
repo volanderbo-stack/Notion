@@ -51,12 +51,18 @@ export default function App() {
   const ready = useStore((s) => s.ready)
   const route = useRoute()
   const [dbBlocked, setDbBlocked] = useState(false)
+  const [slow, setSlow] = useState(false)
   useThemeMode()
 
   useEffect(() => {
     const f = () => setDbBlocked(true)
     window.addEventListener('galereya:db-blocked', f)
-    return () => window.removeEventListener('galereya:db-blocked', f)
+    // Якщо за кілька секунд не відкрилось — пояснити, що робити, замість вічної заставки
+    const t = setTimeout(() => setSlow(true), 4000)
+    return () => {
+      window.removeEventListener('galereya:db-blocked', f)
+      clearTimeout(t)
+    }
   }, [])
 
   useEffect(() => {
@@ -79,10 +85,16 @@ export default function App() {
         ) : (
           <div className="splash">
             <div className="splash-logo" />
-            {dbBlocked && (
-              <p className="splash-text">
-                Застосунок оновився. Закрийте інші вкладки чи вікна з Розумною галереєю — і він відкриється.
-              </p>
+            {(dbBlocked || slow) && (
+              <div className="splash-help">
+                <p className="splash-text">
+                  {dbBlocked
+                    ? 'Застосунок оновився, але стара версія ще відкрита в іншій вкладці чи вікні.'
+                    : 'Відкривається довше, ніж зазвичай.'}
+                  {' '}Закрийте інші вкладки з галереєю (і саму галерею в списку недавніх застосунків), потім відкрийте знову.
+                </p>
+                <button className="btn" onClick={() => location.reload()}>Перезавантажити</button>
+              </div>
             )}
           </div>
         )}
